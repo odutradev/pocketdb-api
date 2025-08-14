@@ -1,7 +1,7 @@
 {
-  "name": "bonfire-api",
-  "version": "1.5.5",
-  "description": "API responsavel por gerir dados dos sistemas do Bonfire",
+  "name": "pocketdb-api",
+  "version": "1.0.0",
+  "description": "Your pocket backend",
   "main": "src/server.ts",
   "scripts": {
     "control-access": "tsx -r tsconfig-paths/register src/utils/functions/controlAccess.ts",
@@ -14,14 +14,14 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/thebonfiretech/bonfire-api.git"
+    "url": "git+ssh://git@github.com/odutradev/pocketdb-api.git"
   },
   "author": "https://github.com/odutradev",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/thebonfiretech/bonfire-api/issues"
+    "url": "https://github.com/odutradev/pocketdb-api/issues"
   },
-  "homepage": "https://github.com/thebonfiretech/bonfire-api#readme",
+  "homepage": "https://github.com/odutradev/pocketdb-api#readme",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/chalk": "^0.4.31",

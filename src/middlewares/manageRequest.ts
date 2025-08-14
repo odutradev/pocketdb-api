@@ -5,8 +5,6 @@ import defaultConfig from "@assets/config/default";
 import sendError from "@utils/functions/error";
 import logger from "@utils/functions/logger";
 import { deleteCacheFiles } from "./upload";
-import { UserModelType } from "bonfire-shared-types";
-import { checkUserHasPermissions } from "@database/functions/space";
 
 interface ManageErrorParams {
     code: ResponseErrorsParams;
@@ -19,12 +17,9 @@ export interface ManageRequestBody {
         req: Request;
     };
     ids: {
-        spaceID?: string;
-        classID?: string;
-        userID?: string;
+
     };
     manageError: (data: ManageErrorParams) => void;
-    manageCheckUserHasPermissions: (user: UserModelType | string, permissions: string[]) => Promise<boolean>;
     files: Express.Multer.File[];
     params: any;
     querys: any;
@@ -54,10 +49,6 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
             sendError({ code, error, res, local: service.name });
         };
 
-        const manageCheckUserHasPermissions = async (user: UserModelType | string, permissions: string[]): Promise<boolean> => {
-            const hasPermissions = await checkUserHasPermissions(user, manageError, permissions, req.header('spaceID') || "", res);
-            return hasPermissions;
-        };
 
         try {
             const manageRequestBody: ManageRequestBody = {
@@ -66,7 +57,6 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
                 data: req.body,
                 querys: req.query,
                 manageError,
-                manageCheckUserHasPermissions,
                 files,
                 ids: {
                     spaceID: req.header('spaceID'),

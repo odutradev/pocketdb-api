@@ -1,4 +1,17 @@
-FROM node:18 AS builder
+# Fase de construção (builder)
+# FROM node:18 AS builder
+
+# WORKDIR /app
+
+# COPY package*.json tsconfig.json ./
+
+# RUN npm install
+
+# COPY . .
+
+# RUN npm run build
+
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -8,17 +21,18 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+EXPOSE 1000
 
-FROM node:18-alpine
+CMD ["npm", "run", "dev"]
 
-WORKDIR /app
+# As linhas abaixo são agora comentadas, pois não serão mais usadas:
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
+# Copiar os arquivos compilados da fase builder
+# COPY --from=builder /app/dist ./dist
+# COPY --from=builder /app/package*.json ./
 
-RUN npm install --only=production
+# Instalar apenas as dependências de produção
+# RUN npm install --only=production
 
-EXPOSE 3000
-
-CMD ["node", "dist/server.js"]
+# Rodar o servidor compilado na fase final (não será utilizado agora)
+# CMD ["node", "dist/server.js"]

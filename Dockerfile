@@ -19,6 +19,6 @@ COPY --from=builder /app/package*.json ./
 
 RUN npm install --only=production
 
-EXPOSE 7201
+EXPOSE 1000
 
 CMD ["node", "dist/server.js"]

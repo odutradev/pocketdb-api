@@ -14,7 +14,6 @@ router.get("/validate/control-access", controlAccess, (req, res) => {
 });
 
 
-// router.use("kv", [controlAccess],  usersRouter);
-router.use("/kv",  kvRouter);
+router.use("/kv", [controlAccess],  kvRouter);
 
 export default router;

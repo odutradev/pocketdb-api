@@ -14,17 +14,17 @@ const ask = (question: string): Promise<string> => {
   return new Promise((resolve) => rl.question(question, resolve));
 };
 
-const getClientData = async () => {
-  const clientId = await ask('Insira o client-id: ');
+const getProjectData = async () => {
+  const projectID = await ask('Insira o projectID: ');
   const validityDays = await ask('Tempo de validade (em dias): ');
   rl.close();
 
-  return { clientId, validityDays: Number(validityDays) };
+  return { clientId: projectID, validityDays: Number(validityDays) };
 };
 
 logger.info("Sistema de controle de acesso");
 
-getClientData().then((questions) => {
+getProjectData().then((questions) => {
     const data = {
         publicToken: process.env.PUBLIC_ACCESS_TOKEN || "",
         createAt: Date.now(),

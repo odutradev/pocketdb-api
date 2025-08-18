@@ -23,6 +23,12 @@ const controlAccess = async (req: Request, res: Response, next: NextFunction): P
         sendError({ code: "control_access_denied", res });
         return;
       }
+
+      const projectID = decoded?.projectID as string | undefined;
+      if (projectID) {
+        res.locals.projectID = projectID;
+      }
+
       next();
     });
 

@@ -1,8 +1,7 @@
 import { Router } from "express";
 
-import kvResource from "@resources/kv/kv.resource";
 import manageRequest from "@middlewares/manageRequest";
-import controlAccess from "@middlewares/controlAccess";
+import kvResource from "@resources/kv/kv.resource";
 
 const kvRouter = Router();
 

@@ -17,7 +17,7 @@ export interface ManageRequestBody {
         req: Request;
     };
     ids: {
-
+        projectID: String
     };
     manageError: (data: ManageErrorParams) => void;
     files: Express.Multer.File[];
@@ -49,19 +49,18 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
             sendError({ code, error, res, local: service.name });
         };
 
+        const projectID = res.locals?.projectID;
 
         try {
             const manageRequestBody: ManageRequestBody = {
                 defaultExpress: { res, req },
                 params: req.params,
-                data: req.body,
                 querys: req.query,
+                data: req.body,
                 manageError,
                 files,
                 ids: {
-                    spaceID: req.header('spaceID'),
-                    classID: req.header('classID'),
-                    userID: res.locals?.userID,
+                    projectID
                 },
             };
 
@@ -76,6 +75,7 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
             res.set("api-database-name", defaultConfig.clusterName);
             res.set("api-version", defaultConfig.version);
             res.set("api-mode", defaultConfig.mode);
+            res.set("projectID", projectID);
             res.status(200).json(result);
             headersSent = true;
         } catch (error) {

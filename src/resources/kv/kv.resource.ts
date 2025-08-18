@@ -24,6 +24,26 @@ const kvResource = {
         } catch (error) {
             manageError({ code: "internal_error", error });
         }
+    },
+
+    getById: async ({ params, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            const { id } = params
+            
+            if (!projectID || !collection || !id) return manageError({ code: "invalid_params" });
+            
+            const record = await genericModel.findOne({ 
+                collection: collection,
+                projectID: projectID, 
+                _id: id
+            });
+            
+            if (!record) return manageError({ code: "object_not_found" });
+            return record;
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
     }
 };
 

@@ -9,10 +9,11 @@ export type ResponseErrorsParams =
   | "no_credentials_sent" 
   | "invalid_credentials" 
   | "token_is_not_valid" 
+  | "object_not_found"
   | "internal_error" 
   | "invalid_params" 
   | "access_denied"
-  | "invalid_data" 
+  | "invalid_data"
   | "no_data_sent" 
   | "no_token";
   
@@ -48,6 +49,10 @@ export const ResponseErrors: Record<ResponseErrorsParams, ResponseError> = {
   access_denied: {
     message: "Acesso negado",
     statusCode: 401,
+  },
+  object_not_found: {
+    message: "Objeto não encontrado",
+    statusCode: 404,
   },
   control_access_denied: {
     message: "Acesso negado, sem token de segurança",

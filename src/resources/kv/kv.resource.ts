@@ -44,6 +44,59 @@ const kvResource = {
         } catch (error) {
             manageError({ code: "internal_error", error });
         }
+    },
+
+    deleteById: async ({ params, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            const { id } = params;
+            
+            if (!projectID || !collection || !id) return manageError({ code: "invalid_params" });
+            
+            const deletedRecord = await genericModel.findOneAndDelete({
+                collection: collection,
+                projectID: projectID,
+                _id: id
+            });
+            
+            if (!deletedRecord) return manageError({ code: "object_not_found" });
+            return { deleted: true };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    deleteCollection: async ({ manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            
+            if (!projectID || !collection) return manageError({ code: "invalid_params" });
+            
+            const deleteResult = await genericModel.deleteMany({
+                collection: collection,
+                projectID: projectID
+            });
+            
+            return { deleted: true, deletedCount: deleteResult.deletedCount };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    deleteProject: async ({ manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID } = ids;
+            
+            if (!projectID) return manageError({ code: "invalid_params" });
+            
+            const deleteResult = await genericModel.deleteMany({
+                projectID: projectID
+            });
+            
+            return { deleted: true, deletedCount: deleteResult.deletedCount };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
     }
 };
 

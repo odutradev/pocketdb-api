@@ -2,11 +2,12 @@ import type { ManageRequestBody } from "@middlewares/manageRequest";
 import genericModel from "@database/model/generic";
 
 const kvResource = {
-    create: async ({ data, manageError }: ManageRequestBody) => {
+    create: async ({ data, manageError, ids }: ManageRequestBody) => {
         try {
             if (!data) return manageError({ code: "no_data_sent" });
             
-            const { projectID, collection, data: recordData, expiresInDays, expiresAt} = data;
+            const { data: recordData, expiresInDays, expiresAt} = data;
+            const { projectID, collection } = ids;
             
             if (!projectID || !collection || !recordData) return manageError({ code: "invalid_data" });
             

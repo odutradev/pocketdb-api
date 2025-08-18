@@ -17,7 +17,8 @@ export interface ManageRequestBody {
         req: Request;
     };
     ids: {
-        projectID: String
+        collection: String;
+        projectID: String;
     };
     manageError: (data: ManageErrorParams) => void;
     files: Express.Multer.File[];
@@ -50,6 +51,7 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
         };
 
         const projectID = res.locals?.projectID;
+        const collection = req.params?.collection;
 
         try {
             const manageRequestBody: ManageRequestBody = {
@@ -60,7 +62,8 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
                 manageError,
                 files,
                 ids: {
-                    projectID
+                    projectID,
+                    collection
                 },
             };
 

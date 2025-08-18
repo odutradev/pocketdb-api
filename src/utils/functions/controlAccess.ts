@@ -19,7 +19,7 @@ const getProjectData = async () => {
   const validityDays = await ask('Tempo de validade (em dias): ');
   rl.close();
 
-  return { clientId: projectID, validityDays: Number(validityDays) };
+  return { projectID, validityDays: Number(validityDays) };
 };
 
 logger.info("Sistema de controle de acesso");

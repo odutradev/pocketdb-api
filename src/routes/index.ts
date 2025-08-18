@@ -10,7 +10,7 @@ router.get("/ping", (req, res) => {
 });
 
 router.get("/validate/control-access", controlAccess, (req, res) => {
-    res.sendStatus(200);
+    res.send(`Authorization as "${res.locals.projectID}"`).status(200);
 });
 
 

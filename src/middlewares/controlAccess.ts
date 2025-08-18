@@ -29,6 +29,11 @@ const controlAccess = async (req: Request, res: Response, next: NextFunction): P
         res.locals.projectID = projectID;
       }
 
+      if (!projectID){
+        sendError({ code: "control_access_denied", res });
+        return;
+      }
+
       next();
     });
 

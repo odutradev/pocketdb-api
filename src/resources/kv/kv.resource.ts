@@ -34,10 +34,9 @@ const kvResource = {
 
             const page = parseInt(querys.page as string) || 1;
             const limit = parseInt(querys.limit as string) || 10;
-            const search = querys.search as string;
             const pagination = querys.pagination !== 'false';
 
-            const reservedParams = ['page', 'limit', 'search', 'pagination'];
+            const reservedParams = ['page', 'limit', 'pagination'];
             const dynamicParams = objectService.filterObject(querys, reservedParams);
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
@@ -45,36 +44,11 @@ const kvResource = {
                 return filters;
             }, {});
 
-            let query: any = {
+            const query: any = {
                 collection: collection,
                 projectID: projectID,
                 ...dynamicFilters
             };
-
-            if (search) {
-                const searchCondition = {
-                    $or: [
-                        { "data": { $regex: search, $options: "i" } },
-                        { "collection": { $regex: search, $options: "i" } }
-                    ]
-                };
-
-                if (Object.keys(dynamicFilters).length > 0) {
-                    query = {
-                        collection: collection,
-                        projectID: projectID,
-                        $and: [
-                            dynamicFilters,
-                            searchCondition
-                        ]
-                    };
-                } else {
-                    query = {
-                        ...query,
-                        ...searchCondition
-                    };
-                }
-            }
 
             if (pagination) {
                 const skip = (page - 1) * limit;

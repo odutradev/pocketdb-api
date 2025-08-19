@@ -46,6 +46,41 @@ const kvResource = {
         }
     },
 
+    updateById: async ({ params, data, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            const { id } = params;
+            
+            if (!projectID || !collection || !id) return manageError({ code: "invalid_params" });
+            if (!data) return manageError({ code: "no_data_sent" });
+            
+            const { data: recordData, expiresInDays, expiresAt } = data;
+            
+            const updateData: any = {
+                lastUpdate: new Date()
+            };
+            
+            if (expiresInDays !== undefined) updateData.expiresInDays = expiresInDays;
+            if (expiresAt !== undefined) updateData.expiresAt = expiresAt;
+            if (recordData !== undefined) updateData.data = recordData;
+            
+            const updatedRecord = await genericModel.findOneAndUpdate(
+                {
+                    collection: collection,
+                    projectID: projectID,
+                    _id: id
+                },
+                updateData,
+                { new: true }
+            );
+            
+            if (!updatedRecord) return manageError({ code: "object_not_found" });
+            return updatedRecord;
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
     deleteById: async ({ params, manageError, ids }: ManageRequestBody) => {
         try {
             const { projectID, collection } = ids;

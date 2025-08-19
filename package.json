@@ -1,6 +1,6 @@
 {
   "name": "pocketdb-api",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Your pocket backend",
   "main": "src/server.ts",
   "scripts": {

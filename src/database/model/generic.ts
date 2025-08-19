@@ -32,11 +32,26 @@ const genericSchema = new mongoose.Schema({
     }
 });
 
+const calculateExpirationDate = (expiresInDays: number) => {
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + expiresInDays);
+    return expirationDate;
+};
+
 genericSchema.pre('save', function(next) {
     if (this.expiresInDays && this.isModified('expiresInDays')) {
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + this.expiresInDays);
-        this.expiresAt = expirationDate;
+        this.expiresAt = calculateExpirationDate(this.expiresInDays);
+    }
+    next();
+});
+
+genericSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function(next) {
+    const update = this.getUpdate() as any;
+    if (update && update.expiresInDays) {
+        update.expiresAt = calculateExpirationDate(update.expiresInDays);
+    }
+    if (update && update.$set && update.$set.expiresInDays) {
+        update.$set.expiresAt = calculateExpirationDate(update.$set.expiresInDays);
     }
     next();
 });

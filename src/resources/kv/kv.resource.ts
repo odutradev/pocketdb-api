@@ -1,5 +1,6 @@
 import type { ManageRequestBody } from "@middlewares/manageRequest";
 import genericModel from "@database/model/generic";
+import objectService from "@utils/services/objectServices";
 
 const kvResource = {
     create: async ({ data, manageError, ids }: ManageRequestBody) => {
@@ -21,6 +22,86 @@ const kvResource = {
             
             const savedRecord = await newRecord.save();
             return savedRecord;
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    getAll: async ({ querys, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            if (!projectID || !collection) return manageError({ code: "invalid_params" });
+
+            const page = parseInt(querys.page as string) || 1;
+            const limit = parseInt(querys.limit as string) || 10;
+            const search = querys.search as string;
+            const pagination = querys.pagination !== 'false';
+
+            const reservedParams = ['page', 'limit', 'search', 'pagination'];
+            const dynamicParams = objectService.filterObject(querys, reservedParams);
+            
+            const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
+                filters[`data.${key}`] = { $regex: dynamicParams[key], $options: "i" };
+                return filters;
+            }, {});
+
+            let query: any = {
+                collection: collection,
+                projectID: projectID,
+                ...dynamicFilters
+            };
+
+            if (search) {
+                const searchCondition = {
+                    $or: [
+                        { "data": { $regex: search, $options: "i" } },
+                        { "collection": { $regex: search, $options: "i" } }
+                    ]
+                };
+
+                if (Object.keys(dynamicFilters).length > 0) {
+                    query = {
+                        collection: collection,
+                        projectID: projectID,
+                        $and: [
+                            dynamicFilters,
+                            searchCondition
+                        ]
+                    };
+                } else {
+                    query = {
+                        ...query,
+                        ...searchCondition
+                    };
+                }
+            }
+
+            if (pagination) {
+                const skip = (page - 1) * limit;
+                const totalCount = await genericModel.countDocuments(query);
+                const totalPages = Math.ceil(totalCount / limit);
+                
+                const records = await genericModel
+                    .find(query)
+                    .skip(skip)
+                    .limit(limit)
+                    .sort({ createdAt: -1 });
+
+                return {
+                    data: records,
+                    pagination: {
+                        currentPage: page,
+                        totalPages,
+                        totalCount,
+                        limit,
+                        hasNext: page < totalPages,
+                        hasPrev: page > 1
+                    }
+                };
+            }
+
+            const records = await genericModel.find(query).sort({ createdAt: -1 });
+            return { data: records };
         } catch (error) {
             manageError({ code: "internal_error", error });
         }

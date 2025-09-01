@@ -133,6 +133,122 @@ const kvResource = {
         }
     },
 
+    eval: async ({ data, querys, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            if (!projectID || !collection) return manageError({ code: "invalid_params" });
+            if (!data) return manageError({ code: "no_data_sent" });
+
+            const { operation, field, filters = {} } = data;
+            if (!operation || !field) return manageError({ code: "invalid_data" });
+
+            const validOperations = ['sum', 'avg', 'count', 'min', 'max', 'distinct'];
+            if (!validOperations.includes(operation)) return manageError({ code: "invalid_data" });
+
+            const reservedParams = ['createdAfter', 'createdBefore'];
+            const dynamicParams = objectService.filterObject(querys, reservedParams);
+            
+            const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
+                filters[`data.${key}`] = { $regex: dynamicParams[key], $options: "i" };
+                return filters;
+            }, {});
+
+            const matchStage: any = {
+                collection: collection,
+                projectID: projectID,
+                ...dynamicFilters
+            };
+
+            Object.keys(filters).forEach(key => {
+                matchStage[`data.${key}`] = filters[key];
+            });
+
+            if (querys.createdAfter || querys.createdBefore) {
+                matchStage.createdAt = {};
+                if (querys.createdAfter) {
+                    matchStage.createdAt.$gte = new Date(querys.createdAfter as string);
+                }
+                if (querys.createdBefore) {
+                    matchStage.createdAt.$lte = new Date(querys.createdBefore as string);
+                }
+            }
+
+            const pipeline: any[] = [{ $match: matchStage }];
+
+            switch (operation) {
+                case 'sum':
+                    pipeline.push({
+                        $group: {
+                            _id: null,
+                            result: { $sum: `$${field}` }
+                        }
+                    });
+                    break;
+
+                case 'avg':
+                    pipeline.push({
+                        $group: {
+                            _id: null,
+                            result: { $avg: `$${field}` }
+                        }
+                    });
+                    break;
+
+                case 'count':
+                    pipeline.push({
+                        $group: {
+                            _id: null,
+                            result: { $sum: 1 }
+                        }
+                    });
+                    break;
+
+                case 'min':
+                    pipeline.push({
+                        $group: {
+                            _id: null,
+                            result: { $min: `$${field}` }
+                        }
+                    });
+                    break;
+
+                case 'max':
+                    pipeline.push({
+                        $group: {
+                            _id: null,
+                            result: { $max: `$${field}` }
+                        }
+                    });
+                    break;
+
+                case 'distinct':
+                    pipeline.push({
+                        $group: {
+                            _id: `$${field}`,
+                            count: { $sum: 1 }
+                        }
+                    });
+                    pipeline.push({
+                        $group: {
+                            _id: null,
+                            result: { $push: { value: "$_id", count: "$count" } }
+                        }
+                    });
+                    break;
+            }
+
+            const result = await genericModel.aggregate(pipeline);
+            
+            if (result.length === 0) {
+                return { operation, field, result: operation === 'distinct' ? [] : 0 };
+            }
+
+            return { operation, field, result: result[0].result };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
     getById: async ({ params, manageError, ids }: ManageRequestBody) => {
         try {
             const { projectID, collection } = ids;

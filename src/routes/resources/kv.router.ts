@@ -8,6 +8,7 @@ const kvRouter = Router();
 kvRouter.get("/:collection/get-all", manageRequest(kvResource.getAll));
 kvRouter.get("/:collection/count", manageRequest(kvResource.count));
 kvRouter.post("/:collection/create", manageRequest(kvResource.create));
+kvRouter.post("/:collection/eval", manageRequest(kvResource.eval));
 kvRouter.get("/:collection/get/:id", manageRequest(kvResource.getById));
 kvRouter.patch("/:collection/update/:id", manageRequest(kvResource.updateById));
 kvRouter.delete("/:collection/delete/:id", manageRequest(kvResource.deleteById));

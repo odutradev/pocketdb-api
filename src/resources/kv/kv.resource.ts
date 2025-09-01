@@ -35,8 +35,10 @@ const kvResource = {
             const page = parseInt(querys.page as string) || 1;
             const limit = parseInt(querys.limit as string) || 10;
             const pagination = querys.pagination !== 'false';
+            const sortBy = querys.sortBy as string || 'createdAt';
+            const sortOrder = querys.sortOrder as string === 'asc' ? 1 : -1;
 
-            const reservedParams = ['page', 'limit', 'pagination'];
+            const reservedParams = ['page', 'limit', 'pagination', 'sortBy', 'sortOrder', 'createdAfter', 'createdBefore'];
             const dynamicParams = objectService.filterObject(querys, reservedParams);
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
@@ -50,6 +52,20 @@ const kvResource = {
                 ...dynamicFilters
             };
 
+            if (querys.createdAfter || querys.createdBefore) {
+                query.createdAt = {};
+                if (querys.createdAfter) {
+                    query.createdAt.$gte = new Date(querys.createdAfter as string);
+                }
+                if (querys.createdBefore) {
+                    query.createdAt.$lte = new Date(querys.createdBefore as string);
+                }
+            }
+
+            const sortField = sortBy.startsWith('data.') ? sortBy : (sortBy === 'createdAt' || sortBy === 'lastUpdate') ? sortBy : `data.${sortBy}`;
+            const sortOptions: any = {};
+            sortOptions[sortField] = sortOrder;
+
             if (pagination) {
                 const skip = (page - 1) * limit;
                 const totalCount = await genericModel.countDocuments(query);
@@ -59,7 +75,7 @@ const kvResource = {
                     .find(query)
                     .skip(skip)
                     .limit(limit)
-                    .sort({ createdAt: -1 });
+                    .sort(sortOptions);
 
                 return {
                     data: records,
@@ -74,7 +90,7 @@ const kvResource = {
                 };
             }
 
-            const records = await genericModel.find(query).sort({ createdAt: -1 });
+            const records = await genericModel.find(query).sort(sortOptions);
             return { data: records };
         } catch (error) {
             manageError({ code: "internal_error", error });

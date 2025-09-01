@@ -17,6 +17,8 @@
 - ✅ **Autenticação JWT** com controle por projeto
 - ✅ **Paginação automática** (`?page=1&limit=10&pagination=false`)
 - ✅ **Filtros dinâmicos** por qualquer campo (`?campo=valor`)
+- ✅ **Ordenação customizada** (`?sortBy=campo&sortOrder=asc/desc`)
+- ✅ **Filtros de data por período** (`?createdAfter=2024-01-01&createdBefore=2024-12-31`)
 - ✅ **Expiração automática** (`expiresInDays`, `expiresAt`)
 - ✅ **Upload de arquivos** (middleware configurado)
 - ✅ **Sistema de logs** coloridos e estruturados
@@ -31,8 +33,6 @@
 - ❌ `POST /kv/:collection/search` - busca com operadores ($gt, $lt, $in, $regex)
 - ❌ `GET /kv/:collection/count` - contar registros com filtros
 - ❌ `GET /kv/:collection/distinct/:field` - valores únicos de um campo
-- ❌ Ordenação customizada (`?sortBy=campo&sortOrder=asc`)
-- ❌ Filtros de data (`?createdAfter=2024-01-01&createdBefore=2024-12-31`)
 - ❌ Filtros de range (`?preco[gte]=100&preco[lte]=500`)
 
 #### **Bulk Operations**
@@ -190,6 +190,12 @@ DELETE /kv/users/delete/673abc123
 // Filtros por campo
 ?name=João&status=active&age=25
 
+// Ordenação customizada
+?sortBy=name&sortOrder=asc
+
+// Filtros de data
+?createdAfter=2024-01-01&createdBefore=2024-12-31
+
 // Desabilitar paginação
 ?pagination=false
 ```
@@ -206,9 +212,9 @@ DELETE /kv/users/delete/673abc123
 
 ## 📊 **Progresso do Roadmap**
 
-**Total de Endpoints Planejados**: ~80  
+**Total de Endpoints Planejados**: ~78  
 **Implementados**: 8 (10%)  
-**Alta Prioridade**: 15 endpoints  
+**Alta Prioridade**: 13 endpoints  
 **Média Prioridade**: 12 endpoints  
 **Baixa Prioridade**: 45+ endpoints  
 

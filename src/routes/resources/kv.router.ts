@@ -6,6 +6,7 @@ import kvResource from "@resources/kv/kv.resource";
 const kvRouter = Router();
 
 kvRouter.get("/:collection/get-all", manageRequest(kvResource.getAll));
+kvRouter.get("/:collection/count", manageRequest(kvResource.count));
 kvRouter.post("/:collection/create", manageRequest(kvResource.create));
 kvRouter.get("/:collection/get/:id", manageRequest(kvResource.getById));
 kvRouter.patch("/:collection/update/:id", manageRequest(kvResource.updateById));

@@ -97,6 +97,42 @@ const kvResource = {
         }
     },
 
+    count: async ({ querys, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            if (!projectID || !collection) return manageError({ code: "invalid_params" });
+
+            const reservedParams = ['createdAfter', 'createdBefore'];
+            const dynamicParams = objectService.filterObject(querys, reservedParams);
+            
+            const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
+                filters[`data.${key}`] = { $regex: dynamicParams[key], $options: "i" };
+                return filters;
+            }, {});
+
+            const query: any = {
+                collection: collection,
+                projectID: projectID,
+                ...dynamicFilters
+            };
+
+            if (querys.createdAfter || querys.createdBefore) {
+                query.createdAt = {};
+                if (querys.createdAfter) {
+                    query.createdAt.$gte = new Date(querys.createdAfter as string);
+                }
+                if (querys.createdBefore) {
+                    query.createdAt.$lte = new Date(querys.createdBefore as string);
+                }
+            }
+
+            const count = await genericModel.countDocuments(query);
+            return { count };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
     getById: async ({ params, manageError, ids }: ManageRequestBody) => {
         try {
             const { projectID, collection } = ids;

@@ -1,6 +1,7 @@
 import type { ManageRequestBody } from "@middlewares/manageRequest";
 import genericModel from "@database/model/generic";
 import objectService from "@utils/services/objectServices";
+import exportService from "@utils/services/exportService";
 
 const kvResource = {
     create: async ({ data, manageError, ids }: ManageRequestBody) => {
@@ -352,6 +353,122 @@ const kvResource = {
             });
             
             return { deleted: true, deletedCount: deleteResult.deletedCount };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    exportCollection: async ({ querys, manageError, ids, defaultExpress }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            if (!projectID || !collection) return manageError({ code: "invalid_params" });
+
+            const format = (querys.format as string) || 'json';
+            if (!['json', 'csv'].includes(format)) return manageError({ code: "invalid_params" });
+
+            const records = await genericModel.find({
+                collection: collection,
+                projectID: projectID
+            });
+
+            if (format === 'csv') {
+                const csvData = exportService.convertToCSV(records);
+                defaultExpress.res.setHeader('Content-Type', 'text/csv');
+                defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="${collection}.csv"`);
+                return defaultExpress.res.send(csvData);
+            }
+
+            const jsonData = exportService.convertToJSON(records);
+            defaultExpress.res.setHeader('Content-Type', 'application/json');
+            defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="${collection}.json"`);
+            return defaultExpress.res.send(jsonData);
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    importCollection: async ({ data, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID, collection } = ids;
+            if (!projectID || !collection) return manageError({ code: "invalid_params" });
+            if (!data) return manageError({ code: "no_data_sent" });
+
+            const { data: importData } = data;
+            if (!Array.isArray(importData)) return manageError({ code: "invalid_data" });
+
+            const recordsToInsert = importData.map(item => ({
+                projectID,
+                collection,
+                data: item,
+                createdAt: new Date(),
+                lastUpdate: new Date()
+            }));
+
+            const insertedRecords = await genericModel.insertMany(recordsToInsert);
+            return { imported: true, count: insertedRecords.length };
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    exportProject: async ({ querys, manageError, ids, defaultExpress }: ManageRequestBody) => {
+        try {
+            const { projectID } = ids;
+            if (!projectID) return manageError({ code: "invalid_params" });
+
+            const format = (querys.format as string) || 'json';
+            if (!['json', 'csv'].includes(format)) return manageError({ code: "invalid_params" });
+
+            const records = await genericModel.find({ projectID: projectID });
+            const groupedData = exportService.groupByCollection(records);
+            const exportData = exportService.formatProjectExport(groupedData, format);
+
+            if (format === 'csv') {
+                defaultExpress.res.setHeader('Content-Type', 'text/csv');
+                defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="project-${projectID}.csv"`);
+                return defaultExpress.res.send(exportData);
+            }
+
+            defaultExpress.res.setHeader('Content-Type', 'application/json');
+            defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="project-${projectID}.json"`);
+            return defaultExpress.res.send(exportData);
+        } catch (error) {
+            manageError({ code: "internal_error", error });
+        }
+    },
+
+    importProject: async ({ data, manageError, ids }: ManageRequestBody) => {
+        try {
+            const { projectID } = ids;
+            if (!projectID) return manageError({ code: "invalid_params" });
+            if (!data) return manageError({ code: "no_data_sent" });
+
+            const { data: importData } = data;
+            if (!importData || typeof importData !== 'object') return manageError({ code: "invalid_data" });
+
+            let totalImported = 0;
+            const importResults: Record<string, number> = {};
+
+            for (const collectionName of Object.keys(importData)) {
+                const collectionData = importData[collectionName];
+                if (!Array.isArray(collectionData)) continue;
+
+                const recordsToInsert = collectionData.map(item => ({
+                    projectID,
+                    collection: collectionName,
+                    data: item.data || item,
+                    createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+                    lastUpdate: new Date(),
+                    expiresInDays: item.expiresInDays,
+                    expiresAt: item.expiresAt ? new Date(item.expiresAt) : undefined
+                }));
+
+                const insertedRecords = await genericModel.insertMany(recordsToInsert);
+                importResults[collectionName] = insertedRecords.length;
+                totalImported += insertedRecords.length;
+            }
+
+            return { imported: true, totalCount: totalImported, collections: importResults };
         } catch (error) {
             manageError({ code: "internal_error", error });
         }

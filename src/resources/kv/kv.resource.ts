@@ -43,7 +43,18 @@ const kvResource = {
             const dynamicParams = objectService.filterObject(querys, reservedParams);
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
-                filters[`data.${key}`] = { $regex: dynamicParams[key], $options: "i" };
+                const value = dynamicParams[key];
+                
+                if (value === 'true') {
+                    filters[`data.${key}`] = true;
+                } else if (value === 'false') {
+                    filters[`data.${key}`] = false;
+                } else if (!isNaN(Number(value)) && value !== '') {
+                    filters[`data.${key}`] = Number(value);
+                } else {
+                    filters[`data.${key}`] = { $regex: value, $options: "i" };
+                }
+                
                 return filters;
             }, {});
 
@@ -107,7 +118,18 @@ const kvResource = {
             const dynamicParams = objectService.filterObject(querys, reservedParams);
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
-                filters[`data.${key}`] = { $regex: dynamicParams[key], $options: "i" };
+                const value = dynamicParams[key];
+                
+                if (value === 'true') {
+                    filters[`data.${key}`] = true;
+                } else if (value === 'false') {
+                    filters[`data.${key}`] = false;
+                } else if (!isNaN(Number(value)) && value !== '') {
+                    filters[`data.${key}`] = Number(value);
+                } else {
+                    filters[`data.${key}`] = { $regex: value, $options: "i" };
+                }
+                
                 return filters;
             }, {});
 
@@ -150,7 +172,18 @@ const kvResource = {
             const dynamicParams = objectService.filterObject(querys, reservedParams);
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
-                filters[`data.${key}`] = { $regex: dynamicParams[key], $options: "i" };
+                const value = dynamicParams[key];
+                
+                if (value === 'true') {
+                    filters[`data.${key}`] = true;
+                } else if (value === 'false') {
+                    filters[`data.${key}`] = false;
+                } else if (!isNaN(Number(value)) && value !== '') {
+                    filters[`data.${key}`] = Number(value);
+                } else {
+                    filters[`data.${key}`] = { $regex: value, $options: "i" };
+                }
+                
                 return filters;
             }, {});
 
@@ -161,7 +194,17 @@ const kvResource = {
             };
 
             Object.keys(filters).forEach(key => {
-                matchStage[`data.${key}`] = filters[key];
+                const value = filters[key];
+                
+                if (typeof value === 'boolean') {
+                    matchStage[key] = value;
+                } else if (typeof value === 'number') {
+                    matchStage[key] = value;
+                } else if (typeof value === 'string') {
+                    matchStage[key] = { $regex: value, $options: "i" };
+                } else {
+                    matchStage[key] = value;
+                }
             });
 
             if (querys.createdAfter || querys.createdBefore) {

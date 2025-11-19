@@ -193,7 +193,31 @@ const kvResource = {
                 ...dynamicFilters
             };
 
+            const bodyCreatedAfter = filters.createdAfter;
+            const bodyCreatedBefore = filters.createdBefore;
+            const dateFilters: any = {};
+
+            if (bodyCreatedAfter) {
+                dateFilters.$gte = new Date(bodyCreatedAfter);
+            }
+            if (bodyCreatedBefore) {
+                dateFilters.$lte = new Date(bodyCreatedBefore);
+            }
+
+            if (querys.createdAfter) {
+                dateFilters.$gte = new Date(querys.createdAfter as string);
+            }
+            if (querys.createdBefore) {
+                dateFilters.$lte = new Date(querys.createdBefore as string);
+            }
+
+            if (Object.keys(dateFilters).length > 0) {
+                matchStage.createdAt = dateFilters;
+            }
+
             Object.keys(filters).forEach(key => {
+                if (key === 'createdAfter' || key === 'createdBefore') return;
+                
                 const value = filters[key];
                 
                 if (typeof value === 'boolean') {
@@ -206,16 +230,6 @@ const kvResource = {
                     matchStage[key] = value;
                 }
             });
-
-            if (querys.createdAfter || querys.createdBefore) {
-                matchStage.createdAt = {};
-                if (querys.createdAfter) {
-                    matchStage.createdAt.$gte = new Date(querys.createdAfter as string);
-                }
-                if (querys.createdBefore) {
-                    matchStage.createdAt.$lte = new Date(querys.createdBefore as string);
-                }
-            }
 
             const pipeline: any[] = [{ $match: matchStage }];
 

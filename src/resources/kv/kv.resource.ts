@@ -1,7 +1,7 @@
 import type { ManageRequestBody } from "@middlewares/manageRequest";
-import genericModel from "@database/model/generic";
 import objectService from "@utils/services/objectServices";
 import exportService from "@utils/services/exportService";
+import genericModel from "@database/model/generic";
 
 const kvResource = {
     create: async ({ data, manageError, ids }: ManageRequestBody) => {
@@ -44,15 +44,16 @@ const kvResource = {
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
                 const value = dynamicParams[key];
+                const filterKey = key.startsWith('data.') ? key : `data.${key}`;
                 
                 if (value === 'true') {
-                    filters[`data.${key}`] = true;
+                    filters[filterKey] = true;
                 } else if (value === 'false') {
-                    filters[`data.${key}`] = false;
+                    filters[filterKey] = false;
                 } else if (!isNaN(Number(value)) && value !== '') {
-                    filters[`data.${key}`] = Number(value);
+                    filters[filterKey] = Number(value);
                 } else {
-                    filters[`data.${key}`] = { $regex: value, $options: "i" };
+                    filters[filterKey] = { $regex: value, $options: "i" };
                 }
                 
                 return filters;
@@ -119,15 +120,16 @@ const kvResource = {
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
                 const value = dynamicParams[key];
+                const filterKey = key.startsWith('data.') ? key : `data.${key}`;
                 
                 if (value === 'true') {
-                    filters[`data.${key}`] = true;
+                    filters[filterKey] = true;
                 } else if (value === 'false') {
-                    filters[`data.${key}`] = false;
+                    filters[filterKey] = false;
                 } else if (!isNaN(Number(value)) && value !== '') {
-                    filters[`data.${key}`] = Number(value);
+                    filters[filterKey] = Number(value);
                 } else {
-                    filters[`data.${key}`] = { $regex: value, $options: "i" };
+                    filters[filterKey] = { $regex: value, $options: "i" };
                 }
                 
                 return filters;
@@ -173,15 +175,16 @@ const kvResource = {
             
             const dynamicFilters = Object.keys(dynamicParams).reduce((filters: any, key) => {
                 const value = dynamicParams[key];
+                const filterKey = key.startsWith('data.') ? key : `data.${key}`;
                 
                 if (value === 'true') {
-                    filters[`data.${key}`] = true;
+                    filters[filterKey] = true;
                 } else if (value === 'false') {
-                    filters[`data.${key}`] = false;
+                    filters[filterKey] = false;
                 } else if (!isNaN(Number(value)) && value !== '') {
-                    filters[`data.${key}`] = Number(value);
+                    filters[filterKey] = Number(value);
                 } else {
-                    filters[`data.${key}`] = { $regex: value, $options: "i" };
+                    filters[filterKey] = { $regex: value, $options: "i" };
                 }
                 
                 return filters;

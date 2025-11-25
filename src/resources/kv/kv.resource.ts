@@ -8,7 +8,7 @@ const kvResource = {
         try {
             if (!data) return manageError({ code: "no_data_sent" });
             
-            const { data: recordData, expiresInDays, expiresAt} = data;
+            const { data: recordData, expiresInDays, expiresAt, createdAt} = data;
             const { projectID, collection } = ids;
             
             if (!projectID || !collection || !recordData) return manageError({ code: "invalid_data" });
@@ -19,6 +19,7 @@ const kvResource = {
                 projectID,
                 collection,
                 expiresAt,
+                ...(createdAt && { createdAt: new Date(createdAt) })
             });
             
             const savedRecord = await newRecord.save();
@@ -338,7 +339,7 @@ const kvResource = {
             if (!projectID || !collection || !id) return manageError({ code: "invalid_params" });
             if (!data) return manageError({ code: "no_data_sent" });
             
-            const { data: recordData, expiresInDays, expiresAt } = data;
+            const { data: recordData, expiresInDays, expiresAt, createdAt } = data;
             
             const updateData: any = {
                 lastUpdate: new Date()
@@ -347,6 +348,7 @@ const kvResource = {
             if (expiresInDays !== undefined) updateData.expiresInDays = expiresInDays;
             if (expiresAt !== undefined) updateData.expiresAt = expiresAt;
             if (recordData !== undefined) updateData.data = recordData;
+            if (createdAt !== undefined) updateData.createdAt = new Date(createdAt);
             
             const updatedRecord = await genericModel.findOneAndUpdate(
                 {

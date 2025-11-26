@@ -437,13 +437,14 @@ const kvResource = {
                 const csvData = exportService.convertToCSV(records);
                 defaultExpress.res.setHeader('Content-Type', 'text/csv');
                 defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="${collection}.csv"`);
-                return defaultExpress.res.send(csvData);
+                defaultExpress.res.send(csvData);
+                return;
             }
 
             const jsonData = exportService.convertToJSON(records);
             defaultExpress.res.setHeader('Content-Type', 'application/json');
             defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="${collection}.json"`);
-            return defaultExpress.res.send(jsonData);
+            defaultExpress.res.send(jsonData);
         } catch (error) {
             manageError({ code: "internal_error", error });
         }
@@ -488,12 +489,13 @@ const kvResource = {
             if (format === 'csv') {
                 defaultExpress.res.setHeader('Content-Type', 'text/csv');
                 defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="project-${projectID}.csv"`);
-                return defaultExpress.res.send(exportData);
+                defaultExpress.res.send(exportData);
+                return;
             }
 
             defaultExpress.res.setHeader('Content-Type', 'application/json');
             defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="project-${projectID}.json"`);
-            return defaultExpress.res.send(exportData);
+            defaultExpress.res.send(exportData);
         } catch (error) {
             manageError({ code: "internal_error", error });
         }

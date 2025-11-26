@@ -37,7 +37,6 @@ interface ManageRequestOptionsParams {
 
 const manageRequest = (service: ManageRequestParams["service"], options?: ManageRequestOptionsParams) => {
     return async (req: Request, res: Response) => {
-        let headersSent = false;
         let files: Express.Multer.File[] = [];
 
         if (options?.upload) {
@@ -45,8 +44,7 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
         };
 
         const manageError = ({ code, error }: ManageErrorParams) => {
-            if (headersSent) return;
-            headersSent = true;
+            if (res.headersSent) return;
             sendError({ code, error, res, local: service.name });
         };
 
@@ -73,20 +71,18 @@ const manageRequest = (service: ManageRequestParams["service"], options?: Manage
                await deleteCacheFiles(files);
             };
 
-            if (headersSent) return;
+            if (res.headersSent) return;
 
             res.set("api-database-name", defaultConfig.clusterName);
             res.set("api-version", defaultConfig.version);
             res.set("api-mode", defaultConfig.mode);
             res.set("projectID", projectID);
             res.status(200).json(result);
-            headersSent = true;
         } catch (error) {
-            if (!headersSent) {
+            if (!res.headersSent) {
                 logger.error("[manageRequest] Request internal error");
                 console.error(error);
                 sendError({ code: "internal_error", res });
-                headersSent = true;
             }
         }
     };

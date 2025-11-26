@@ -438,7 +438,6 @@ const kvResource = {
                 defaultExpress.res.setHeader('Content-Type', 'text/csv');
                 defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="${collection}.csv"`);
                 defaultExpress.res.send(csvData);
-                return;
             }
 
             const jsonData = exportService.convertToJSON(records);
@@ -490,7 +489,6 @@ const kvResource = {
                 defaultExpress.res.setHeader('Content-Type', 'text/csv');
                 defaultExpress.res.setHeader('Content-Disposition', `attachment; filename="project-${projectID}.csv"`);
                 defaultExpress.res.send(exportData);
-                return;
             }
 
             defaultExpress.res.setHeader('Content-Type', 'application/json');

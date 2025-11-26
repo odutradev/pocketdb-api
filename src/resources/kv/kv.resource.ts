@@ -459,13 +459,19 @@ const kvResource = {
             const { data: importData } = data;
             if (!Array.isArray(importData)) return manageError({ code: "invalid_data" });
 
-            const recordsToInsert = importData.map(item => ({
-                projectID,
-                collection,
-                data: item,
-                createdAt: new Date(),
-                lastUpdate: new Date()
-            }));
+            const recordsToInsert = importData.map(item => {
+                const recordData = item.data && typeof item.data === 'object' ? item.data : item;
+                
+                return {
+                    projectID,
+                    collection,
+                    data: recordData,
+                    createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+                    lastUpdate: new Date(),
+                    expiresInDays: item.expiresInDays,
+                    expiresAt: item.expiresAt ? new Date(item.expiresAt) : undefined
+                };
+            });
 
             const insertedRecords = await genericModel.insertMany(recordsToInsert);
             return { imported: true, count: insertedRecords.length };
@@ -517,15 +523,19 @@ const kvResource = {
                 const collectionData = importData[collectionName];
                 if (!Array.isArray(collectionData)) continue;
 
-                const recordsToInsert = collectionData.map(item => ({
-                    projectID,
-                    collection: collectionName,
-                    data: item.data || item,
-                    createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
-                    lastUpdate: new Date(),
-                    expiresInDays: item.expiresInDays,
-                    expiresAt: item.expiresAt ? new Date(item.expiresAt) : undefined
-                }));
+                const recordsToInsert = collectionData.map(item => {
+                    const recordData = item.data && typeof item.data === 'object' ? item.data : item;
+                    
+                    return {
+                        projectID,
+                        collection: collectionName,
+                        data: recordData,
+                        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+                        lastUpdate: new Date(),
+                        expiresInDays: item.expiresInDays,
+                        expiresAt: item.expiresAt ? new Date(item.expiresAt) : undefined
+                    };
+                });
 
                 const insertedRecords = await genericModel.insertMany(recordsToInsert);
                 importResults[collectionName] = insertedRecords.length;
